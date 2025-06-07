@@ -1,6 +1,6 @@
 # BriochePlugin
 
-Un plugin Minecraft Paper 1.20.4 développé par **BenJ4368** pour serveurdedart.fr ([Discord](discord.gg/dart
+Un plugin Minecraft Paper 1.20.4 développé par **BenJ4368** pour serveurdedart.fr ([Discord](https://discord.gg/dart
 ), [Dart](https://www.youtube.com/@darteuh)).
 
 ## ✨ Fonctionnalités actuelles
