@@ -4,3 +4,7 @@ main: benj.brioche.BriochePlugin
 api-version: 1.20
 authors: [ Benj4368 ]
 description: Plugin made for serveurdedart.fr
+commands:
+  chestlocker:
+    description: Commande principale pour le plugin ChestLocker.
+    usage: /chestlocker <lock|unlock|add|remove>
