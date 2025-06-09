@@ -1,4 +1,5 @@
 package benj.brioche;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import benj.brioche.chatmention.ChatMentionListener;
 import benj.brioche.chestlocker.ChestLockerListener;
@@ -8,29 +9,41 @@ import benj.brioche.chestlocker.ChestLockerCommands;
 public class BriochePlugin extends JavaPlugin {
 
 	private ChestLockerManager chestLockerManager;
+	private ChestLockerCommands chestLockerCommands;
 
+	/**
+	 * This method is called when the plugin is enabled.
+	 * It registers the necessary listeners and commands for the plugin.
+	 */
     @Override
     public void onEnable() {
-        // plugin startup logic
+		// Creating the Data folder if it doesn't exist
+		if (!getDataFolder().exists())
+        	getDataFolder().mkdir();
 
 		// Registering the ChatMentionListener to handle chat mentions
 		getServer().getPluginManager().registerEvents(new ChatMentionListener(), this);
 
-		// Creating the ChestLockerData folder if it doesn't exist
-		if (!getDataFolder().exists())
-        getDataFolder().mkdir();
 		// Registering the ChestLockerManager and its commands
 		chestLockerManager = new ChestLockerManager(this);
+		chestLockerCommands = new ChestLockerCommands(chestLockerManager);
 		this.getCommand("chestlocker").setExecutor(new ChestLockerCommands(chestLockerManager));
+		PluginCommand cmd = this.getCommand("chestlocker");
+		if (cmd != null) {
+			cmd.setExecutor(chestLockerCommands);
+			cmd.setTabCompleter(chestLockerCommands);
+		}
 		getServer().getPluginManager().registerEvents(new ChestLockerListener(chestLockerManager), this);
 
 
 		getLogger().info("BriochePlugin has started.");
     }
 
+	/**
+	 * This method is called when the plugin is disabled.
+	 */
     @Override
     public void onDisable() {
-        // plugin shutdown logic
 
 		chestLockerManager.saveChestData();
         getLogger().info("BriochePlugin has stopped.");

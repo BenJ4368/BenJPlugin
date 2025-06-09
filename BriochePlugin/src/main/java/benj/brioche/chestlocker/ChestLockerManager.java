@@ -6,9 +6,12 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.type.Chest;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.entity.Player;
@@ -23,14 +26,28 @@ public class ChestLockerManager {
 
 	private final File dataFile;
 	private final Gson gson;
-	private Map<Location, LockedChestData> lockedChests = new HashMap<>();
+	private Map<String, LockedChestData> lockedChests = new HashMap<>();
 
 	public ChestLockerManager(Plugin plugin) {
 		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.setPrettyPrinting();
 		gsonBuilder.registerTypeAdapter(Location.class, new LocationTypeAdapter());
 		this.gson = gsonBuilder.create();
 		dataFile = new File(plugin.getDataFolder(), "ChestLockerData.json");
 		loadChestData();
+	}
+
+	public String locToKey(Location loc) {
+		return loc.getWorld().getName() + ":" + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
+	}
+
+	public Location keyToLoc(String key) {
+		String[] parts = key.split("[:|,]");
+		World world = Bukkit.getWorld(parts[0]);
+		int x = Integer.parseInt(parts[1]);
+		int y = Integer.parseInt(parts[2]);
+		int z = Integer.parseInt(parts[3]);
+		return new Location(world, x, y, z);
 	}
 
 	private void loadChestData() {
@@ -46,13 +63,10 @@ public class ChestLockerManager {
 				while ((line = reader.readLine()) != null)
 					stringBuilder.append(line);
 			}
-
 			String jsonContent = stringBuilder.toString();
-			Bukkit.getLogger().info("JSON Content: " + jsonContent);
 
 			try (StringReader stringReader = new StringReader(jsonContent)) {
-				java.lang.reflect.Type type = new TypeToken<Map<Location, LockedChestData>>() {
-				}.getType();
+				java.lang.reflect.Type type = new TypeToken<Map<String, LockedChestData>>() {}.getType();
 				lockedChests = gson.fromJson(stringReader, type);
 			}
 		} catch (IOException e) {
@@ -77,7 +91,8 @@ public class ChestLockerManager {
 		Player cmdSender = Bukkit.getPlayer(cmdSenderUUID);
 
 		if (!(blockState instanceof InventoryHolder)) {
-			cmdSender.sendMessage(Component.text("Ce bloc n'est pas un conteneur valide.").color(NamedTextColor.YELLOW));
+			cmdSender
+					.sendMessage(Component.text("Ce bloc n'est pas un conteneur valide.").color(NamedTextColor.YELLOW));
 			return;
 		}
 		if (blockState instanceof org.bukkit.block.Chest) {
@@ -85,11 +100,12 @@ public class ChestLockerManager {
 			org.bukkit.block.data.type.Chest chestData = (org.bukkit.block.data.type.Chest) chest.getBlockData();
 
 			if (chestData.getType() != org.bukkit.block.data.type.Chest.Type.SINGLE) {
-				Block adjacentChestBlock = getAdjacentChestBlock(block, chestData.getType());
+				Block adjacentChestBlock = getAdjacentChestBlock(block, chestData);
 				if (adjacentChestBlock != null) {
 					Location adjacentLocation = adjacentChestBlock.getLocation();
 					if (isChestLocked(location) || isChestLocked(adjacentLocation)) {
-						cmdSender.sendMessage(Component.text("Ce conteneur est déjà verrouillé.").color(NamedTextColor.YELLOW));
+						cmdSender.sendMessage(
+								Component.text("Ce conteneur est déjà verrouillé.").color(NamedTextColor.YELLOW));
 						return;
 					}
 					lockSingleContainer(location, cmdSenderUUID);
@@ -99,7 +115,8 @@ public class ChestLockerManager {
 				}
 			} else {
 				if (isChestLocked(location)) {
-					cmdSender.sendMessage(Component.text("Ce conteneur est déjà verrouillé.").color(NamedTextColor.YELLOW));
+					cmdSender.sendMessage(
+							Component.text("Ce conteneur est déjà verrouillé.").color(NamedTextColor.YELLOW));
 					return;
 				} else
 					lockSingleContainer(location, cmdSenderUUID);
@@ -114,10 +131,30 @@ public class ChestLockerManager {
 		cmdSender.sendMessage(Component.text("Conteneur Verrouillé.").color(NamedTextColor.GREEN));
 	}
 
-	private Block getAdjacentChestBlock(Block block, org.bukkit.block.data.type.Chest.Type chestType) {
-		BlockFace face = (chestType == org.bukkit.block.data.type.Chest.Type.LEFT) ? BlockFace.EAST : BlockFace.WEST;
-		Block adjacentBlock = block.getRelative(face);
-		return adjacentBlock.getState() instanceof org.bukkit.block.Chest ? adjacentBlock : null;
+	public Block getAdjacentChestBlock(Block chestBlock, org.bukkit.block.data.type.Chest chestData) {
+		BlockFace facing = chestData.getFacing();
+		org.bukkit.block.data.type.Chest.Type type = chestData.getType();
+
+		BlockFace offset = null;
+
+		switch (facing) {
+			case NORTH:
+				offset = (type == Chest.Type.LEFT) ? BlockFace.EAST : BlockFace.WEST;
+				break;
+			case SOUTH:
+				offset = (type == Chest.Type.LEFT) ? BlockFace.WEST : BlockFace.EAST;
+				break;
+			case EAST:
+				offset = (type == Chest.Type.LEFT) ? BlockFace.SOUTH : BlockFace.NORTH;
+				break;
+			case WEST:
+				offset = (type == Chest.Type.LEFT) ? BlockFace.NORTH : BlockFace.SOUTH;
+				break;
+			default:
+				return null;
+		}
+
+		return offset != null ? chestBlock.getRelative(offset) : null;
 	}
 
 	private void lockSingleContainer(Location location, UUID ownerUUID) {
@@ -129,14 +166,14 @@ public class ChestLockerManager {
 				ownerUUID,
 				new ArrayList<>());
 
-		lockedChests.put(location, containerData);
+		lockedChests.put(locToKey(location), containerData);
 		saveChestData();
 	}
 
 	public void unlockContainer(Location location, UUID cmdSenderUUID) {
 		Player cmdSender = Bukkit.getPlayer(cmdSenderUUID);
 
-		LockedChestData chestData = lockedChests.get(location);
+		LockedChestData chestData = lockedChests.get(locToKey(location));
 		if (chestData == null) {
 			cmdSender.sendMessage(Component.text("Ce conteneur n'est pas verrouillé.").color(NamedTextColor.YELLOW));
 			return;
@@ -154,25 +191,26 @@ public class ChestLockerManager {
 			org.bukkit.block.data.type.Chest chestDataBlock = (org.bukkit.block.data.type.Chest) chest.getBlockData();
 
 			if (chestDataBlock.getType() != org.bukkit.block.data.type.Chest.Type.SINGLE) {
-				Block adjacentChestBlock = getAdjacentChestBlock(block, chestDataBlock.getType());
+				Block adjacentChestBlock = getAdjacentChestBlock(block, chestDataBlock);
 				if (adjacentChestBlock != null) {
 					Location adjacentLocation = adjacentChestBlock.getLocation();
 					if (isChestLocked(adjacentLocation)) {
-						lockedChests.remove(adjacentLocation);
+						lockedChests.remove(locToKey(adjacentLocation));
 					}
 				}
 			}
 		}
 
-		lockedChests.remove(location);
+		lockedChests.remove(locToKey(location));
 		saveChestData();
 		cmdSender.sendMessage(Component.text("Conteneur déverrouillé.").color(NamedTextColor.GREEN));
 	}
 
 	public void addAuthorizedPlayer(Location location, UUID cmdSenderUUID, UUID playerUUID) {
+		System.out.println("Adding authorized player: " + playerUUID);
 		Player cmdSender = Bukkit.getPlayer(cmdSenderUUID);
 
-		LockedChestData chestData = lockedChests.get(location);
+		LockedChestData chestData = lockedChests.get(locToKey(location));
 		if (chestData == null) {
 			cmdSender.sendMessage(Component.text("Ce conteneur n'est pas verrouillé.").color(NamedTextColor.YELLOW));
 			return;
@@ -193,10 +231,10 @@ public class ChestLockerManager {
 			org.bukkit.block.data.type.Chest chestDataBlock = (org.bukkit.block.data.type.Chest) chest.getBlockData();
 
 			if (chestDataBlock.getType() != org.bukkit.block.data.type.Chest.Type.SINGLE) {
-				Block adjacentChestBlock = getAdjacentChestBlock(block, chestDataBlock.getType());
+				Block adjacentChestBlock = getAdjacentChestBlock(block, chestDataBlock);
 				if (adjacentChestBlock != null) {
 					Location adjacentLocation = adjacentChestBlock.getLocation();
-					LockedChestData adjacentChestData = lockedChests.get(adjacentLocation);
+					LockedChestData adjacentChestData = lockedChests.get(locToKey(adjacentLocation));
 					if (adjacentChestData != null) {
 						if (adjacentChestData.authorized.contains(playerUUID)) {
 							cmdSender.sendMessage(Component.text("Ce joueur à déjà accès à ce conteneur.")
@@ -221,9 +259,10 @@ public class ChestLockerManager {
 	}
 
 	public void removeAuthorizedPlayer(Location location, UUID cmdSenderUUID, UUID playerUUID) {
+		System.out.println("Removing authorized player: " + playerUUID);
 		Player cmdSender = Bukkit.getPlayer(cmdSenderUUID);
 
-		LockedChestData chestData = lockedChests.get(location);
+		LockedChestData chestData = lockedChests.get(locToKey(location));
 		if (chestData == null) {
 			cmdSender.sendMessage(Component.text("Ce conteneur n'est pas verrouillé.").color(NamedTextColor.YELLOW));
 			return;
@@ -244,10 +283,10 @@ public class ChestLockerManager {
 			org.bukkit.block.data.type.Chest chestDataBlock = (org.bukkit.block.data.type.Chest) chest.getBlockData();
 
 			if (chestDataBlock.getType() != org.bukkit.block.data.type.Chest.Type.SINGLE) {
-				Block adjacentChestBlock = getAdjacentChestBlock(block, chestDataBlock.getType());
+				Block adjacentChestBlock = getAdjacentChestBlock(block, chestDataBlock);
 				if (adjacentChestBlock != null) {
 					Location adjacentLocation = adjacentChestBlock.getLocation();
-					LockedChestData adjacentChestData = lockedChests.get(adjacentLocation);
+					LockedChestData adjacentChestData = lockedChests.get(locToKey(adjacentLocation));
 					if (adjacentChestData != null) {
 						if (!adjacentChestData.authorized.contains(playerUUID)) {
 							cmdSender.sendMessage(
@@ -275,32 +314,34 @@ public class ChestLockerManager {
 
 	public void checkLocker(Location location, UUID cmdSenderUUID) {
 		Player cmdSender = Bukkit.getPlayer(cmdSenderUUID);
-		LockedChestData chestData = lockedChests.get(location);
+		LockedChestData chestData = lockedChests.get(locToKey(location));
+
 		if (chestData == null) {
 			cmdSender.sendMessage(Component.text("Ce conteneur n'est pas verrouillé.").color(NamedTextColor.YELLOW));
 			return;
 		}
 
-		StringBuilder message = new StringBuilder("Conteneur verrouillé par: " + chestData.owner + "\n");
+		StringBuilder message = new StringBuilder("Conteneur verrouillé par: ");
+		OfflinePlayer owner = Bukkit.getOfflinePlayer(chestData.owner);
+		message.append(owner.getName() != null ? owner.getName() : chestData.owner.toString()).append("\n");
+
 		message.append("Joueurs autorisés: ");
 		if (chestData.authorized.isEmpty()) {
 			message.append("Aucun joueur autorisé.");
 		} else {
 			for (UUID uuid : chestData.authorized) {
-				Player player = Bukkit.getPlayer(uuid);
-				if (player != null) {
-					message.append(player.getName()).append(", ");
-				} else {
-					message.append(uuid.toString()).append(", ");
-				}
+				OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
+				String name = p.getName() != null ? p.getName() : uuid.toString();
+				message.append(name).append(", ");
 			}
-			message.setLength(message.length() - 2); // Remove trailing comma and space
+			message.setLength(message.length() - 2); // remove trailing ", "
 		}
+
 		cmdSender.sendMessage(Component.text(message.toString()).color(NamedTextColor.LIGHT_PURPLE));
 	}
 
 	public boolean isAuthorized(Location location, UUID cmdSenderUUID) {
-		LockedChestData chestData = lockedChests.get(location);
+		LockedChestData chestData = lockedChests.get(locToKey(location));
 		if (chestData == null)
 			return true;
 
@@ -308,14 +349,13 @@ public class ChestLockerManager {
 	}
 
 	public boolean isChestLocked(Location location) {
-		return lockedChests.containsKey(location);
+		return lockedChests.containsKey(locToKey(location));
 	}
 
 	public UUID getChestOwner(Location location) {
-		LockedChestData chestData = lockedChests.get(location);
-		if (chestData != null) {
+		LockedChestData chestData = lockedChests.get(locToKey(location));
+		if (chestData != null)
 			return chestData.owner;
-		}
-		return null; // No owner if the chest is not locked
+		return null;
 	}
 }
