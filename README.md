@@ -1,7 +1,7 @@
 # BriochePlugin
 
-Un plugin Minecraft 1.20.4 sous PaperMC développé par **BenJ4368** pour la communauté du serveurdedart.fr ([Discord](discord.gg/dart
-), [Dart](https://www.youtube.com/@darteuh)).
+Un plugin Minecraft 1.20.4 sous PaperMC développé par **BenJ4368**<br>
+pour la communauté du serveurdedart.fr ([Discord](discord.gg/dart), [Dart](https://www.youtube.com/@darteuh)).
 
 ## 🧠 Modules
 
@@ -23,7 +23,7 @@ Un plugin Minecraft 1.20.4 sous PaperMC développé par **BenJ4368** pour la com
   Aucun bloc n'est cassable si le joueur tiens une clé 🔑, pour éviter la destruction des conteneurs en créatif, et des DecoratedPot en survie.<br>
 
   **Les conteneurs verrouillable sont:**<br>
-  
+
   ![Chest, trapped chest, barrel, furnace, smoker, blast furnace, lectern, chiseled bookshelf, decorated pot, shulkerbox, hopper, dropper, dispenser, brewing stand](images/container_list.png)
 
   **Les interactions comprenant au moins un conteneur verrouillé sont limitées. En voici le details:**<br>
