@@ -21,9 +21,9 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Chest;
+
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.minecart.HopperMinecart;
-import org.bukkit.block.Hopper;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -57,7 +57,7 @@ public class ChestLockerListener implements Listener {
 		if (block == null || !(block.getState() instanceof InventoryHolder))
 			return false;
 
-		if (!chestLockerManager.isAuthorized(block.getLocation(), event.getPlayer().getUniqueId())) {
+		if (!(chestLockerManager.isAuthorized(block.getLocation(), event.getPlayer().getUniqueId()) || event.getPlayer().hasPermission("briocheplugin.admin"))) {
 			event.setCancelled(true);
 
 			UUID ownerUUID = chestLockerManager.getChestOwner(block.getLocation());
@@ -243,11 +243,13 @@ public class ChestLockerListener implements Listener {
 			for (BlockFace face : adjacentFaces) {
 				Block adjacentBlock = placedBlock.getRelative(face);
 
-				if (adjacentBlock.getType() == Material.CHEST) {
+				if (adjacentBlock.getType() == Material.CHEST &&
+						adjacentBlock.getBlockData() instanceof Chest chestData &&
+						chestData.getType() == Chest.Type.SINGLE) {
 					if (chestLockerManager.isChestLocked(adjacentBlock.getLocation())) {
 						event.setCancelled(true);
 						event.getPlayer().sendMessage(Component.text(
-								"Un coffre verrouillé est adjacent. Deverrouillez-le d'abord pour placer ce second coffre.")
+								"Un coffre simple verrouillé est adjacent. Deverrouillez-le d'abord pour placer ce second coffre.")
 								.color(NamedTextColor.RED));
 						return;
 					}
@@ -279,29 +281,34 @@ public class ChestLockerListener implements Listener {
 	 * Minecart hoppers cannot interact with locked containers at all.
 	 */
 	@EventHandler
-	public void onInventoryMoveItem(InventoryMoveItemEvent event) {
-		Inventory sourceInventory = event.getSource();
-		Inventory destinationInventory = event.getDestination();
-		if (sourceInventory.getHolder() == null || destinationInventory.getHolder() == null)
-			return;
+public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+    Inventory sourceInventory = event.getSource();
+    Inventory destinationInventory = event.getDestination();
+    Inventory initiatorInventory = event.getInitiator();
+    if (sourceInventory.getHolder() == null || destinationInventory.getHolder() == null || initiatorInventory.getHolder() == null)
+        return;
+    InventoryHolder source = sourceInventory.getHolder();
+    InventoryHolder destination = destinationInventory.getHolder();
+    InventoryHolder initiator = initiatorInventory.getHolder();
 
-		InventoryHolder sourceHolder = sourceInventory.getHolder();
-		InventoryHolder destinationHolder = destinationInventory.getHolder();
-		if (sourceHolder.getInventory() == null || sourceHolder.getInventory().getLocation() == null ||
-				destinationHolder.getInventory() == null || destinationHolder.getInventory().getLocation() == null)
-			return;
+    boolean isSourceLocked = chestLockerManager.isChestLocked(source.getInventory().getLocation());
+    boolean isDestinationLocked = chestLockerManager.isChestLocked(destination.getInventory().getLocation());
 
-		boolean isSourceLocked = chestLockerManager.isChestLocked(sourceHolder.getInventory().getLocation());
-		boolean isDestinationHopper = destinationHolder instanceof Hopper;
-		boolean isDestinationMinecartHopper = destinationHolder instanceof HopperMinecart;
+    if (initiator.equals(source)) // Source can always move items
+		return;
 
-		if (isSourceLocked)
-			if ((isDestinationHopper && !hasSameOwn(sourceHolder, destinationHolder)) ||
-					(isDestinationMinecartHopper && isSourceLocked)) {
-				event.setCancelled(true);
-				return;
-			}
+	if (initiator.equals(destination)) {
+		if (!isDestinationLocked) { // if destination is not locked
+			if (isSourceLocked) // but source is locked
+				event.setCancelled(true); //cancel
+		} else { // else, if destination is locked
+			if (isSourceLocked && !hasSameOwner(source, destination)) // but not by the same owner as the source
+				event.setCancelled(true); // cancel
+		}
+		return;
 	}
+	event.setCancelled(true); // failsafe, if ever
+}
 
 	/*
 	 * Listener for inventory pickup by hoppers
@@ -326,7 +333,7 @@ public class ChestLockerListener implements Listener {
 	/*
 	 * Checks if the source and destination holders have the same owner
 	 */
-	public boolean hasSameOwn(InventoryHolder sourceHolder, InventoryHolder destinationHolder) {
+	public boolean hasSameOwner(InventoryHolder sourceHolder, InventoryHolder destinationHolder) {
 		UUID sourceOwner = chestLockerManager.getChestOwner(sourceHolder.getInventory().getLocation());
 		UUID destinationOwner = chestLockerManager.getChestOwner(destinationHolder.getInventory().getLocation());
 		return sourceOwner != null && sourceOwner.equals(destinationOwner);

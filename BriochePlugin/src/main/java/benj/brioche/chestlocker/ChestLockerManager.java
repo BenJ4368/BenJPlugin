@@ -179,7 +179,7 @@ public class ChestLockerManager {
 			return;
 		}
 
-		if (!chestData.owner.equals(cmdSenderUUID)) {
+		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("briocheplugin.admin"))) {
 			cmdSender.sendMessage(Component.text("Vous n'avez pas les droits pour déverrouiller ce conteneur.")
 					.color(NamedTextColor.RED));
 			return;
@@ -215,7 +215,7 @@ public class ChestLockerManager {
 			cmdSender.sendMessage(Component.text("Ce conteneur n'est pas verrouillé.").color(NamedTextColor.YELLOW));
 			return;
 		}
-		if (!chestData.owner.equals(cmdSenderUUID)) {
+		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("briocheplugin.admin"))) {
 			cmdSender.sendMessage(Component.text("Vous n'avez pas les droits pour donner accès a ce conteneur.")
 					.color(NamedTextColor.RED));
 			return;
@@ -267,7 +267,7 @@ public class ChestLockerManager {
 			cmdSender.sendMessage(Component.text("Ce conteneur n'est pas verrouillé.").color(NamedTextColor.YELLOW));
 			return;
 		}
-		if (!chestData.owner.equals(cmdSenderUUID)) {
+		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("briocheplugin.admin"))) {
 			cmdSender.sendMessage(Component.text("Vous n'avez pas les droits pour retirer l'accès à ce conteneur.")
 					.color(NamedTextColor.RED));
 			return;
@@ -340,12 +340,12 @@ public class ChestLockerManager {
 		cmdSender.sendMessage(Component.text(message.toString()).color(NamedTextColor.LIGHT_PURPLE));
 	}
 
-	public boolean isAuthorized(Location location, UUID cmdSenderUUID) {
+	public boolean isAuthorized(Location location, UUID playerUUID) {
 		LockedChestData chestData = lockedChests.get(locToKey(location));
 		if (chestData == null)
 			return true;
 
-		return chestData.owner.equals(cmdSenderUUID) || chestData.authorized.contains(cmdSenderUUID);
+		return chestData.owner.equals(playerUUID) || chestData.authorized.contains(playerUUID);
 	}
 
 	public boolean isChestLocked(Location location) {

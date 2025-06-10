@@ -27,17 +27,8 @@ pour la communauté du serveurdedart.fr ([Discord](discord.gg/dart), [Dart](http
   ![Chest, trapped chest, barrel, furnace, smoker, blast furnace, lectern, chiseled bookshelf, decorated pot, shulkerbox, hopper, dropper, dispenser, brewing stand](images/container_list.png)
 
   **Les interactions comprenant au moins un conteneur verrouillé sont limitées. En voici le details:**<br>
-  *Bloc d'or = conteneur verrouillé*<br>
-  *flèche verte = interaction autorisée*<br>
-  *flèche rouge = interaction stoppée*<br>
 
-  ![Un hopper verrouillé ne peux pas aspirer d'items depuis le monde](images/showInteraction0.png)
-
-  ![Un hopper non verrouillé peux verser dans, mais pas aspirer depuis un conteneur verrouillé.](images/showInteraction1.png)
-  ![Un hopper verrouillé peux verser dans et aspirer depuis un conteneur verrouillé](images/showInteraction2.png)
-
-  ![Un hopper non verrouillé ne peux pas aspirer depuis un hopper verrouillé, même si le second verse dans le premier](images/showInteraction3.png)
-  ![Pour palier à ce soucis, placez simplement un conteneurs non verrouillés entre les deux](images/showInteraction4.png)
+  ![Source peux toujours donner. Destination ne peux prendre que si la source n'est pas verrouillée, ou si Destionation est Source sont verrouillées par le même joueur.](images/showInteractions.png)
 
 
 ## 🧑‍💻 Développement

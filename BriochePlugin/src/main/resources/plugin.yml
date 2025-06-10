@@ -7,4 +7,12 @@ description: Plugin made for serveurdedart.fr
 commands:
   chestlocker:
     description: Commande principale pour le plugin ChestLocker.
-    usage: /chestlocker <lock|unlock|add|remove>
+    usage: /chestlocker <lock | unlock | add | remove | check>
+
+permissions:
+  briocheplugin.admin:
+    description: Permission admin du plugin BriochePlugin.
+    default: op
+  briocheplugin.user:
+    description: Permission basique du plugin BriochePlugin.
+    default: true
