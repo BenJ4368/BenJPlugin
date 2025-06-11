@@ -358,4 +358,10 @@ public class ChestLockerManager {
 			return chestData.owner;
 		return null;
 	}
+
+	public boolean hasSameOwner(InventoryHolder sourceHolder, InventoryHolder destinationHolder) {
+		UUID sourceOwner = getChestOwner(sourceHolder.getInventory().getLocation());
+		UUID destinationOwner = getChestOwner(destinationHolder.getInventory().getLocation());
+		return sourceOwner != null && sourceOwner.equals(destinationOwner);
+	}
 }

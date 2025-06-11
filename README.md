@@ -5,21 +5,31 @@ pour la communauté du serveurdedart.fr ([Discord](discord.gg/dart), [Dart](http
 
 ## 🧠 Modules
 
-- `chatMention` : Gestion des mentions et du son joué.
-- `chestLocker` : Gestion du verrouillage des coffres et conteneurs.
+- `chatMentioner` : Gestion des mentions et du son joué.
+- [en cours] `chunkClaimer` : Gestion de la protection du terrain.
+- `chestLocker` : Gestion du verrouillage des conteneurs.
 
-### 💬 ChatMention
+### 💬 ChatMentioner
 
   Averti le joueur avec un son lorsque son pseudo est mentionné dans le chat.<br>
-  Aucun son n'est joué si le joueur se mentionne lui-même.<br>
+  ChatMentioner est activé par défaut, mais peux être desactiver :<br>
+  `/chatmentionner <on | off>`<br>
+  Une mention qui proviens d'un modérateur outrepasse ce paramètre, et le son en est différent.<br>
+
+### [en cours] 🛡️ ChunkClaimer
+
+  Permet la protection du terrain et previens les interactions non autorisés.
+  `/chunkclaimer <claim | unclaim | add | remove | check>`
+
 
 ### 🔒 ChestLocker
   Permet le verrouillage, déverrouillage, ajout et retrait de droits sur conteneurs via des clés.<br>
-  `/chestlock <lock | unlock | add | remove | check>`<br>
+  `/chestlocker <lock | unlock | add | remove | check>`<br>
 
   Les clés 🔑 ne sont utilsable dans aucunes recettes de fabrication.<br>
   Les clés 🔑 ne sont pas droppable, et les Piglins 🐽 ne les échangent pas<br>
   Un conteneur verrouillé ne peux être détruis ni par un joueur, ni par une explosion 💥.<br>
+  Un itemframe posé sur un conteneur verrouillé est également verrouillé.
   Aucun bloc n'est cassable si le joueur tiens une clé 🔑, pour éviter la destruction des conteneurs en créatif, et des DecoratedPot en survie.<br>
 
   **Les conteneurs verrouillable sont:**<br>

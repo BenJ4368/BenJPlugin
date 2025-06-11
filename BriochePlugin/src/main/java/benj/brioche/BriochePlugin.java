@@ -1,7 +1,7 @@
 package benj.brioche;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
-import benj.brioche.chatmention.ChatMentionListener;
+import benj.brioche.chatmentioner.ChatMentionerListener;
 import benj.brioche.chestlocker.ChestLockerListener;
 import benj.brioche.chestlocker.ChestLockerManager;
 import benj.brioche.chestlocker.ChestLockerCommands;
@@ -21,8 +21,8 @@ public class BriochePlugin extends JavaPlugin {
 		if (!getDataFolder().exists())
         	getDataFolder().mkdir();
 
-		// Registering the ChatMentionListener to handle chat mentions
-		getServer().getPluginManager().registerEvents(new ChatMentionListener(), this);
+		// Registering the ChatMentionerListener to handle chat mentions
+		getServer().getPluginManager().registerEvents(new ChatMentionerListener(), this);
 
 		// Registering the ChestLockerManager and its commands
 		chestLockerManager = new ChestLockerManager(this);

@@ -5,12 +5,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.Set;
@@ -22,7 +25,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Chest;
-
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Player;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -57,7 +61,8 @@ public class ChestLockerListener implements Listener {
 		if (block == null || !(block.getState() instanceof InventoryHolder))
 			return false;
 
-		if (!(chestLockerManager.isAuthorized(block.getLocation(), event.getPlayer().getUniqueId()) || event.getPlayer().hasPermission("briocheplugin.admin"))) {
+		if (!(chestLockerManager.isAuthorized(block.getLocation(), event.getPlayer().getUniqueId())
+				|| event.getPlayer().hasPermission("briocheplugin.admin"))) {
 			event.setCancelled(true);
 
 			UUID ownerUUID = chestLockerManager.getChestOwner(block.getLocation());
@@ -233,6 +238,10 @@ public class ChestLockerListener implements Listener {
 		}
 	}
 
+	/*
+	 * Listener for placing blocks
+	 * Prevents placing a second chest next to a locked single chest
+	 */
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent event) {
 		Block placedBlock = event.getBlockPlaced();
@@ -281,34 +290,36 @@ public class ChestLockerListener implements Listener {
 	 * Minecart hoppers cannot interact with locked containers at all.
 	 */
 	@EventHandler
-public void onInventoryMoveItem(InventoryMoveItemEvent event) {
-    Inventory sourceInventory = event.getSource();
-    Inventory destinationInventory = event.getDestination();
-    Inventory initiatorInventory = event.getInitiator();
-    if (sourceInventory.getHolder() == null || destinationInventory.getHolder() == null || initiatorInventory.getHolder() == null)
-        return;
-    InventoryHolder source = sourceInventory.getHolder();
-    InventoryHolder destination = destinationInventory.getHolder();
-    InventoryHolder initiator = initiatorInventory.getHolder();
+	public void onInventoryMoveItem(InventoryMoveItemEvent event) {
+		Inventory sourceInventory = event.getSource();
+		Inventory destinationInventory = event.getDestination();
+		Inventory initiatorInventory = event.getInitiator();
+		if (sourceInventory.getHolder() == null || destinationInventory.getHolder() == null
+				|| initiatorInventory.getHolder() == null)
+			return;
+		InventoryHolder source = sourceInventory.getHolder();
+		InventoryHolder destination = destinationInventory.getHolder();
+		InventoryHolder initiator = initiatorInventory.getHolder();
 
-    boolean isSourceLocked = chestLockerManager.isChestLocked(source.getInventory().getLocation());
-    boolean isDestinationLocked = chestLockerManager.isChestLocked(destination.getInventory().getLocation());
+		boolean isSourceLocked = chestLockerManager.isChestLocked(source.getInventory().getLocation());
+		boolean isDestinationLocked = chestLockerManager.isChestLocked(destination.getInventory().getLocation());
 
-    if (initiator.equals(source)) // Source can always move items
-		return;
+		if (initiator.equals(source)) // Source can always move items
+			return;
 
-	if (initiator.equals(destination)) {
-		if (!isDestinationLocked) { // if destination is not locked
-			if (isSourceLocked) // but source is locked
-				event.setCancelled(true); //cancel
-		} else { // else, if destination is locked
-			if (isSourceLocked && !hasSameOwner(source, destination)) // but not by the same owner as the source
-				event.setCancelled(true); // cancel
+		if (initiator.equals(destination)) {
+			if (!isDestinationLocked) { // if destination is not locked
+				if (isSourceLocked) // but source is locked
+					event.setCancelled(true); // cancel
+			} else { // else, if destination is locked
+				if (isSourceLocked && !chestLockerManager.hasSameOwner(source, destination)) // but not by the same
+																								// owner as the source
+					event.setCancelled(true); // cancel
+			}
+			return;
 		}
-		return;
+		event.setCancelled(true); // failsafe, if ever
 	}
-	event.setCancelled(true); // failsafe, if ever
-}
 
 	/*
 	 * Listener for inventory pickup by hoppers
@@ -319,7 +330,8 @@ public void onInventoryMoveItem(InventoryMoveItemEvent event) {
 		Inventory inventory = event.getInventory();
 
 		// Vérifie si l'inventaire est un hopper
-		if (inventory.getType() != InventoryType.HOPPER) return;
+		if (inventory.getType() != InventoryType.HOPPER)
+			return;
 
 		// Récupère la Location du hopper
 		Location hopperLocation = ((org.bukkit.block.Hopper) inventory.getHolder()).getLocation();
@@ -331,12 +343,60 @@ public void onInventoryMoveItem(InventoryMoveItemEvent event) {
 	}
 
 	/*
-	 * Checks if the source and destination holders have the same owner
+	 * Listener for player interaction with item frames
+	 * Prevents players from interacting with item frames that are placed on locked
+	 * containers
 	 */
-	public boolean hasSameOwner(InventoryHolder sourceHolder, InventoryHolder destinationHolder) {
-		UUID sourceOwner = chestLockerManager.getChestOwner(sourceHolder.getInventory().getLocation());
-		UUID destinationOwner = chestLockerManager.getChestOwner(destinationHolder.getInventory().getLocation());
-		return sourceOwner != null && sourceOwner.equals(destinationOwner);
+	@EventHandler
+	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+		if (event.getRightClicked() instanceof ItemFrame) {
+			ItemFrame frame = (ItemFrame) event.getRightClicked();
+			Player player = event.getPlayer();
+
+			Location blockWhereFrameIsPlaceOn = frame.getLocation().getBlock().getRelative(frame.getAttachedFace())
+					.getLocation();
+			if (chestLockerManager.isChestLocked(blockWhereFrameIsPlaceOn)) {
+				if (!chestLockerManager.isAuthorized(blockWhereFrameIsPlaceOn, player.getUniqueId()))
+					event.setCancelled(true);
+			}
+		}
+	}
+
+	@EventHandler
+	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+		if (event.getEntity() instanceof ItemFrame) {
+			ItemFrame frame = (ItemFrame) event.getEntity();
+
+			if (!(event.getDamager() instanceof Player))
+				return;
+			Player player = (Player) event.getDamager();
+
+			Location blockWhereFrameIsPlaceOn = frame.getLocation().getBlock().getRelative(frame.getAttachedFace())
+					.getLocation();
+			if (chestLockerManager.isChestLocked(blockWhereFrameIsPlaceOn)) {
+				if (!chestLockerManager.isAuthorized(blockWhereFrameIsPlaceOn, player.getUniqueId()))
+					event.setCancelled(true);
+			}
+		}
+	}
+
+	@EventHandler
+	public void onHangingBreakByEntity(HangingBreakByEntityEvent event) {
+		if (event.getEntity() instanceof ItemFrame) {
+			ItemFrame frame = (ItemFrame) event.getEntity();
+
+			// Vérifiez si l'entité qui casse le cadre est un joueur
+			if (event.getRemover() instanceof Player) {
+				Player player = (Player) event.getRemover();
+
+				Location blockWhereFrameIsPlaceOn = frame.getLocation().getBlock().getRelative(frame.getAttachedFace())
+						.getLocation();
+				if (chestLockerManager.isChestLocked(blockWhereFrameIsPlaceOn)) {
+					if (!chestLockerManager.isAuthorized(blockWhereFrameIsPlaceOn, player.getUniqueId()))
+						event.setCancelled(true);
+				}
+			}
+		}
 	}
 
 }
