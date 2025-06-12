@@ -43,11 +43,6 @@ pour la communauté du serveurdedart.fr ([Dart](https://www.youtube.com/@darteuh
 
 ## 🧑‍💻 Développement
 
-- Plugin principal : `me.benj.brioche.BriochePlugin`
-- Version du plugin: `1.0-SNAPSHOT`
 - Build tool : **Maven**
 - Java 17+
-
-## 🔗 Auteurs
-
-- [BenJ4368](https://github.com/BenJ4368) — Développement initial
+- [BenJ4368](https://github.com/BenJ4368) — Développement principale
