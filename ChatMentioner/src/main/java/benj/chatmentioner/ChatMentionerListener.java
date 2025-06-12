@@ -10,7 +10,14 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.audience.Audience;
 
+
 public class ChatMentionerListener implements Listener {
+
+	private final DatabaseManager databaseManager;
+
+    public ChatMentionerListener(DatabaseManager databaseManager) {
+        this.databaseManager = databaseManager;
+    }
 
 	@EventHandler
 	public void onPlayerChat(AsyncChatEvent event) {
@@ -27,6 +34,8 @@ public class ChatMentionerListener implements Listener {
 						delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 2.0f, 1.0f, 4L);
 						return;
 					}
+					if (databaseManager.isPlayerMentionDisabled(player.getName()))
+						return;
 					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 2.0f, 0.7f);
 					delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 2.0f, 0.9f, 2L);
 					delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 2.0f, 1.0f, 4L);
