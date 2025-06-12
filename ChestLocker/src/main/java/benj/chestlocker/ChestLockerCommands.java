@@ -1,4 +1,4 @@
-package benj.brioche.chestlocker;
+package benj.chestlocker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,11 +47,11 @@ public class ChestLockerCommands implements CommandExecutor, TabCompleter {
 
 			 PersistentDataContainer container = meta.getPersistentDataContainer();
 
-			NamespacedKey tagKey = new NamespacedKey("briocheplugin", "custom_key_tag");
+			NamespacedKey tagKey = new NamespacedKey("chestlocker", "custom_key_tag");
 			container.set(tagKey, PersistentDataType.STRING, nbtTagValue);
 
 			if (targetPlayerName != null && !targetPlayerName.isEmpty()) {
-				NamespacedKey playerKey = new NamespacedKey("briocheplugin", "target_player_name");
+				NamespacedKey playerKey = new NamespacedKey("chestlocker", "target_player_name");
 				container.set(playerKey, PersistentDataType.STRING, targetPlayerName);
 			}
 

@@ -1,4 +1,4 @@
-package benj.brioche.chestlocker;
+package benj.chestlocker;
 
 import java.util.List;
 import java.util.UUID;

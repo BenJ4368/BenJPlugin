@@ -1,4 +1,4 @@
-package benj.brioche.chestlocker;
+package benj.chestlocker;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -62,7 +62,7 @@ public class ChestLockerListener implements Listener {
 			return false;
 
 		if (!(chestLockerManager.isAuthorized(block.getLocation(), event.getPlayer().getUniqueId())
-				|| event.getPlayer().hasPermission("briocheplugin.admin"))) {
+				|| event.getPlayer().hasPermission("chestlocker.admin"))) {
 			event.setCancelled(true);
 
 			UUID ownerUUID = chestLockerManager.getChestOwner(block.getLocation());
@@ -95,7 +95,7 @@ public class ChestLockerListener implements Listener {
 
 		if (meta != null) {
 			PersistentDataContainer container = meta.getPersistentDataContainer();
-			NamespacedKey keyID = new NamespacedKey("briocheplugin", "custom_key_tag");
+			NamespacedKey keyID = new NamespacedKey("chestlocker", "custom_key_tag");
 
 			if (container.has(keyID, PersistentDataType.STRING)) {
 				String tag = container.get(keyID, PersistentDataType.STRING);
@@ -109,7 +109,7 @@ public class ChestLockerListener implements Listener {
 						break;
 					case "BRIOCHE_CHESTLOCKER_ADD": {
 						System.out.println("Granting access to " + event.getPlayer().getName());
-						NamespacedKey playerKey = new NamespacedKey("briocheplugin", "target_player_name");
+						NamespacedKey playerKey = new NamespacedKey("chestlocker", "target_player_name");
 						String targetPlayerName = container.get(playerKey, PersistentDataType.STRING);
 						OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(targetPlayerName);
 						UUID targetUUID = targetPlayer.getUniqueId();
@@ -119,7 +119,7 @@ public class ChestLockerListener implements Listener {
 					}
 					case "BRIOCHE_CHESTLOCKER_REMOVE": {
 						System.out.println("Revoking access from " + event.getPlayer().getName());
-						NamespacedKey playerKey = new NamespacedKey("briocheplugin", "target_player_name");
+						NamespacedKey playerKey = new NamespacedKey("chestlocker", "target_player_name");
 						String targetPlayerName = container.get(playerKey, PersistentDataType.STRING);
 						OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(targetPlayerName);
 						UUID targetUUID = targetPlayer.getUniqueId();
@@ -156,7 +156,7 @@ public class ChestLockerListener implements Listener {
 		ItemMeta meta = droppedItem.getItemMeta();
 
 		if (meta != null) {
-			NamespacedKey keyID = new NamespacedKey("briocheplugin", "custom_key_tag");
+			NamespacedKey keyID = new NamespacedKey("chestlocker", "custom_key_tag");
 			PersistentDataContainer container = meta.getPersistentDataContainer();
 
 			if (container.has(keyID, PersistentDataType.STRING)) {
@@ -183,7 +183,7 @@ public class ChestLockerListener implements Listener {
 			if (ingredient != null) {
 				ItemMeta meta = ingredient.getItemMeta();
 				if (meta != null) {
-					NamespacedKey keyID = new NamespacedKey("briocheplugin", "custom_key_tag");
+					NamespacedKey keyID = new NamespacedKey("chestlocker", "custom_key_tag");
 					PersistentDataContainer container = meta.getPersistentDataContainer();
 
 					if (container.has(keyID, PersistentDataType.STRING)) {

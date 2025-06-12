@@ -1,4 +1,4 @@
-package benj.brioche.chatmentioner;
+package benj.chatmentioner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -21,7 +21,7 @@ public class ChatMentionerListener implements Listener {
 			if (audience instanceof Player player) {
 				String playerName = player.getName().toLowerCase();
 				if (message.contains(playerName)) {
-					if (sender.hasPermission("briocheplugin.admin")) {
+					if (sender.hasPermission("chatmentioner.admin")) {
 						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 2.0f, 0.7f);
 						delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 2.0f, 0.9f, 2L);
 						delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 2.0f, 1.0f, 4L);
@@ -41,6 +41,6 @@ public class ChatMentionerListener implements Listener {
 			public void run() {
 				player.playSound(player.getLocation(), sound, volume, pitch);
 			}
-		}.runTaskLater(Bukkit.getPluginManager().getPlugin("BriochePlugin"), delay);
+		}.runTaskLater(Bukkit.getPluginManager().getPlugin("ChatMentioner"), delay);
 	}
 }

@@ -1,13 +1,13 @@
-# BriochePlugin
+# BenJ Plugin
 
-Un plugin Minecraft 1.20.4 sous PaperMC développé par **BenJ4368**<br>
-pour la communauté du serveurdedart.fr ([Discord](discord.gg/dart), [Dart](https://www.youtube.com/@darteuh)).
+Plugins Minecraft 1.20.4 sous PaperMC développés par **BenJ4368**<br>
+pour la communauté du serveurdedart.fr ([Dart](https://www.youtube.com/@darteuh), [Discord](discord.gg/dart)).
 
-## 🧠 Modules
+## Liste des plugins
 
-- `chatMentioner` : Gestion des mentions et du son joué.
-- [en cours] `chunkClaimer` : Gestion de la protection du terrain.
-- `chestLocker` : Gestion du verrouillage des conteneurs.
+- `ChatMentioner` : Joue un son à un joueur quand mentionné.
+- [en cours] `ChunkClaimer` : Permet la protection du terrain.
+- `ChestLocker` : Permet le verrouillage des conteneurs.
 
 ### 💬 ChatMentioner
 

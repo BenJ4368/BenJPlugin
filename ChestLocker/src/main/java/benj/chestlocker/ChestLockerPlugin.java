@@ -1,12 +1,8 @@
-package benj.brioche;
+package benj.chestlocker;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
-import benj.brioche.chatmentioner.ChatMentionerListener;
-import benj.brioche.chestlocker.ChestLockerListener;
-import benj.brioche.chestlocker.ChestLockerManager;
-import benj.brioche.chestlocker.ChestLockerCommands;
 
-public class BriochePlugin extends JavaPlugin {
+public class ChestLockerPlugin extends JavaPlugin {
 
 	private ChestLockerManager chestLockerManager;
 	private ChestLockerCommands chestLockerCommands;
@@ -19,10 +15,7 @@ public class BriochePlugin extends JavaPlugin {
     public void onEnable() {
 		// Creating the Data folder if it doesn't exist
 		if (!getDataFolder().exists())
-        	getDataFolder().mkdir();
-
-		// Registering the ChatMentionerListener to handle chat mentions
-		getServer().getPluginManager().registerEvents(new ChatMentionerListener(), this);
+			getDataFolder().mkdir();
 
 		// Registering the ChestLockerManager and its commands
 		chestLockerManager = new ChestLockerManager(this);
@@ -36,7 +29,7 @@ public class BriochePlugin extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new ChestLockerListener(chestLockerManager), this);
 
 
-		getLogger().info("BriochePlugin has started.");
+		getLogger().info("ChestLocker has started.");
     }
 
 	/**
@@ -46,6 +39,6 @@ public class BriochePlugin extends JavaPlugin {
     public void onDisable() {
 
 		chestLockerManager.saveChestData();
-        getLogger().info("BriochePlugin has stopped.");
+        getLogger().info("ChestLocker has stopped.");
     }
 }

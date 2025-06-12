@@ -1,4 +1,4 @@
-package benj.brioche.chestlocker;
+package benj.chestlocker;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -179,7 +179,7 @@ public class ChestLockerManager {
 			return;
 		}
 
-		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("briocheplugin.admin"))) {
+		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("chestlocker.admin"))) {
 			cmdSender.sendMessage(Component.text("Vous n'avez pas les droits pour déverrouiller ce conteneur.")
 					.color(NamedTextColor.RED));
 			return;
@@ -215,7 +215,7 @@ public class ChestLockerManager {
 			cmdSender.sendMessage(Component.text("Ce conteneur n'est pas verrouillé.").color(NamedTextColor.YELLOW));
 			return;
 		}
-		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("briocheplugin.admin"))) {
+		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("chestlocker.admin"))) {
 			cmdSender.sendMessage(Component.text("Vous n'avez pas les droits pour donner accès a ce conteneur.")
 					.color(NamedTextColor.RED));
 			return;
@@ -267,7 +267,7 @@ public class ChestLockerManager {
 			cmdSender.sendMessage(Component.text("Ce conteneur n'est pas verrouillé.").color(NamedTextColor.YELLOW));
 			return;
 		}
-		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("briocheplugin.admin"))) {
+		if (!(chestData.owner.equals(cmdSenderUUID) || cmdSender.hasPermission("chestlocker.admin"))) {
 			cmdSender.sendMessage(Component.text("Vous n'avez pas les droits pour retirer l'accès à ce conteneur.")
 					.color(NamedTextColor.RED));
 			return;

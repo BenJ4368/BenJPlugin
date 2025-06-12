@@ -1,4 +1,4 @@
-package benj.brioche.chestlocker;
+package benj.chestlocker;
 
 import com.google.gson.*;
 import org.bukkit.Location;
