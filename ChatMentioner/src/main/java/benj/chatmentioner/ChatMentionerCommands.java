@@ -28,11 +28,11 @@ public class ChatMentionerCommands implements CommandExecutor {
 
 		String arg = args[0].toLowerCase();
 		if (arg.equals("on")) {
-			if (databaseManager.enableMentionsForPlayer(player.getName())) {
+			if (databaseManager.enableMentionsForPlayer(player.getUniqueId())) {
 				player.sendMessage("Les notifications de mention ont été activées.");
 			}
 		} else if (arg.equals("off")) {
-			if (databaseManager.disableMentionsForPlayer(player.getName())) {
+			if (databaseManager.disableMentionsForPlayer(player.getUniqueId())) {
 				player.sendMessage("Les notifications de mention ont été désactivées.");
 			}
 		} else {

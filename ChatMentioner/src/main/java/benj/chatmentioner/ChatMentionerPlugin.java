@@ -1,5 +1,7 @@
 package benj.chatmentioner;
 
+import java.io.File;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ChatMentionerPlugin extends JavaPlugin {
@@ -15,7 +17,7 @@ public class ChatMentionerPlugin extends JavaPlugin {
 		if(!getDataFolder().exists())
 			getDataFolder().mkdirs();
 
-		databaseManager = new DatabaseManager(getDataFolder().getAbsolutePath() + "/benjchatmentioner.db");
+		databaseManager = new DatabaseManager(new File(getDataFolder(), "benjchatmentioner.db").getPath());
 		databaseManager.connect();
 		databaseManager.createTable();
 		this.getCommand("chatmentioner").setExecutor(new ChatMentionerCommands(databaseManager));

@@ -29,16 +29,16 @@ public class ChatMentionerListener implements Listener {
 				String playerName = player.getName().toLowerCase();
 				if (message.contains(playerName)) {
 					if (sender.hasPermission("chatmentioner.admin")) {
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 2.0f, 0.7f);
-						delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 2.0f, 0.9f, 2L);
-						delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 2.0f, 1.0f, 4L);
+						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 0.7f);
+						delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 0.9f, 2L);
+						delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f, 4L);
 						return;
 					}
-					if (databaseManager.isPlayerMentionDisabled(player.getName()))
+					if (databaseManager.isPlayerMentionDisabled(player.getUniqueId()))
 						return;
-					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 2.0f, 0.7f);
-					delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 2.0f, 0.9f, 2L);
-					delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 2.0f, 1.0f, 4L);
+					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1.0f, 0.7f);
+					delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1.0f, 0.9f, 2L);
+					delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1.0f, 1.0f, 4L);
 				}
 			}
 		}
