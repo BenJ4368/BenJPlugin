@@ -3,6 +3,7 @@ package benj.chatmentioner;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.Sound;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,35 +11,47 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.audience.Audience;
 
-
 public class ChatMentionerListener implements Listener {
 
 	private final DatabaseManager databaseManager;
+	private final FileConfiguration config;
 
-    public ChatMentionerListener(DatabaseManager databaseManager) {
-        this.databaseManager = databaseManager;
-    }
+	public ChatMentionerListener(DatabaseManager databaseManager, FileConfiguration config) {
+		this.databaseManager = databaseManager;
+		this.config = config;
+	}
 
 	@EventHandler
 	public void onPlayerChat(AsyncChatEvent event) {
 		String message = PlainTextComponentSerializer.plainText().serialize(event.message()).toLowerCase();
 		Player sender = event.getPlayer();
+		float volume = (float) config.getDouble("mention_volume", 1.0);
+		float admin_volume = (float) config.getDouble("admin_mention_volume", 1.0);
+		boolean persistAdminMention = config.getBoolean("persist_admin_mention", true);
 
 		for (Audience audience : event.viewers()) {
 			if (audience instanceof Player player) {
 				String playerName = player.getName().toLowerCase();
 				if (message.contains(playerName)) {
-					if (sender.hasPermission("chatmentioner.admin")) {
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 0.7f);
-						delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 0.9f, 2L);
-						delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f, 4L);
-						return;
+					if (!databaseManager.isPlayerMentionDisabled(player.getUniqueId()))
+					{
+						if (sender.hasPermission("chatmentioner.admin")) {
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, admin_volume, 0.7f);
+							delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, admin_volume, 0.9f, 2L);
+							delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, admin_volume, 1.0f, 4L);
+							return;
+						} else {
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, volume, 0.7f);
+							delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, volume, 0.9f, 2L);
+							delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, volume, 1.0f, 4L);
+						}
+					} else {
+						if (sender.hasPermission("chatmentioner.admin") && persistAdminMention) {
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, admin_volume, 0.7f);
+							delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, admin_volume, 0.9f, 2L);
+							delaySound(player, Sound.BLOCK_NOTE_BLOCK_BELL, admin_volume, 1.0f, 4L);
+						}
 					}
-					if (databaseManager.isPlayerMentionDisabled(player.getUniqueId()))
-						return;
-					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1.0f, 0.7f);
-					delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1.0f, 0.9f, 2L);
-					delaySound(player, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1.0f, 1.0f, 4L);
 				}
 			}
 		}

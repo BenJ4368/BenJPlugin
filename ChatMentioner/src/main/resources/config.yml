@@ -1,0 +1,15 @@
+###############
+## ChatMentioner Configuration File
+###############
+
+# Enable/disable the ChatMentioner plugin
+enable_chatmentioner: true
+
+# Volume settings (minimum 0, maximum 2)
+mention_volume: 1
+admin_mention_volume: 1
+
+# Player having disabled mentions still hear admin mentions
+persist_admin_mention: true
+
+

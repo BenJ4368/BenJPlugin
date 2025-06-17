@@ -16,13 +16,13 @@ pour la communauté du serveurdedart.fr ([Dart](https://www.youtube.com/@darteuh
   `/chatmentionner <on | off>`<br>
   Une mention qui proviens d'un modérateur outrepasse ce paramètre, et le son en est différent.<br>
 
-### [en cours] 🛡️ ChunkClaimer
+### [A venir] 🛡️ ChunkClaimer
 
   Permet la protection du terrain et previens les interactions non autorisés.
   `/chunkclaimer <claim | unclaim | add | remove | check>`
 
 
-### 🔒 ChestLocker
+### [Work In Progress]🔒 ChestLocker
   Permet le verrouillage, déverrouillage, ajout et retrait de droits sur conteneurs via des clés.<br>
   `/chestlocker <lock | unlock | add | remove | check>`<br>
 
@@ -38,11 +38,15 @@ pour la communauté du serveurdedart.fr ([Dart](https://www.youtube.com/@darteuh
 
   **Les interactions comprenant au moins un conteneur verrouillé sont limitées. En voici le details:**<br>
 
-  ![Source peux toujours donner. Destination ne peux prendre que si la source n'est pas verrouillée, ou si Destionation est Source sont verrouillées par le même joueur.](images/showInteractions.png)
+  ![Source peux toujours donner. Destination ne peux prendre que si la source n'est pas verrouillée, ou si Destination et Source sont verrouillées par le même joueur.](images/showInteractions.png)
 
 
 ## 🧑‍💻 Développement
 
 - Build tool : **Maven**
 - Java 17+
+- SQLite ou Potgresql
+
+## Auteurs
+
 - [BenJ4368](https://github.com/BenJ4368) — Développement principale
