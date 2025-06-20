@@ -8,6 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ChatMentionerPlugin extends JavaPlugin {
 
 	DatabaseManager databaseManager;
+	CacheManager cacheManager;
 	FileConfiguration config;
 
 	/**
@@ -22,7 +23,6 @@ public class ChatMentionerPlugin extends JavaPlugin {
 		saveDefaultConfig();
 		config = getConfig();
 
-
 		if (!config.getBoolean("enable_chatmentioner")) {
 			getLogger().info("ChatMentioner is disabled in the config. Shutting down plugin.");
 			getServer().getPluginManager().disablePlugin(this);
@@ -32,8 +32,12 @@ public class ChatMentionerPlugin extends JavaPlugin {
 		databaseManager = new DatabaseManager(new File(getDataFolder(), "benjchatmentioner.db").getPath());
 		databaseManager.connect();
 		databaseManager.createTable();
-		this.getCommand("chatmentioner").setExecutor(new ChatMentionerCommands(databaseManager));
-		getServer().getPluginManager().registerEvents(new ChatMentionerListener(databaseManager, config), this);
+
+		cacheManager = new CacheManager(databaseManager);
+
+		this.getCommand("chatmentioner").setExecutor(new ChatMentionerCommands(cacheManager));
+		getServer().getPluginManager().registerEvents(new ChatMentionerListener(config, cacheManager), this);
+
 		getLogger().info("ChatMentioner has started.");
 	}
 

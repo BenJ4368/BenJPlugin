@@ -13,12 +13,12 @@ import net.kyori.adventure.audience.Audience;
 
 public class ChatMentionerListener implements Listener {
 
-	private final DatabaseManager databaseManager;
 	private final FileConfiguration config;
+	private final CacheManager cacheManager;
 
-	public ChatMentionerListener(DatabaseManager databaseManager, FileConfiguration config) {
-		this.databaseManager = databaseManager;
+	public ChatMentionerListener(FileConfiguration config, CacheManager cacheManager) {
 		this.config = config;
+		this.cacheManager = cacheManager;
 	}
 
 	@EventHandler
@@ -33,7 +33,7 @@ public class ChatMentionerListener implements Listener {
 			if (audience instanceof Player player) {
 				String playerName = player.getName().toLowerCase();
 				if (message.contains(playerName)) {
-					if (!databaseManager.isPlayerMentionDisabled(player.getUniqueId()))
+					if (!cacheManager.isPlayerMentionDisabled(player.getUniqueId()))
 					{
 						if (sender.hasPermission("chatmentioner.admin")) {
 							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, admin_volume, 0.7f);

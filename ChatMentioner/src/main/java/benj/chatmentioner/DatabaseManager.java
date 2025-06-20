@@ -1,11 +1,5 @@
 package benj.chatmentioner;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,8 +8,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+import java.util.logging.Logger;
+
 public class DatabaseManager {
 
+	// logger
+	private final Logger logger = JavaPlugin.getPlugin(ChatMentionerPlugin.class).getLogger();
 	private Connection connection;
 	private final String url;
 
@@ -30,9 +30,9 @@ public class DatabaseManager {
 	public void connect() {
 		try {
 			this.connection = DriverManager.getConnection(url);
-			System.out.println("Connected to SQLite DB.");
+			logger.info("Connected to SQLite DB");
 		} catch (SQLException e) {
-			System.out.println("Error connecting to SQLite DB: " + e.getMessage());
+			logger.severe("Error connecting to SQLite DB: " + e.getMessage());
 		}
 	}
 
@@ -40,10 +40,10 @@ public class DatabaseManager {
 		try {
 			if (connection != null) {
 				connection.close();
-				System.out.println("Disconnected from SQLite DB.");
+				logger.info("Disconnected from SQLite DB");
 			}
 		} catch (SQLException e) {
-			System.out.println("Error disconnecting from SQLite DB: " + e.getMessage());
+			logger.severe("Error disconnecting from SQLite DB: " + e.getMessage());
 		}
 	}
 
@@ -52,9 +52,9 @@ public class DatabaseManager {
 
 		try (Statement stmt = connection.createStatement()) {
 			stmt.execute(sql);
-			System.out.println("ChatMention table created successfully.");
+			logger.info("Table benjchatmentioner_off created successfully.");
 		} catch (SQLException e) {
-			System.out.println("Error creating table: " + e.getMessage());
+			logger.severe("Error creating table benjchatmentioner_off: " + e.getMessage());
 		}
 	}
 
@@ -66,51 +66,37 @@ public class DatabaseManager {
 		ResultSet rs = pstmt.executeQuery();
 		return rs.next();
 	} catch (SQLException e) {
-		System.out.println("Error checking player mention status: " + e.getMessage());
+		logger.severe("Error checking if player mention is disabled: " + e.getMessage());
 		return false;
 	}
 }
 
 	public boolean disableMentionsForPlayer(UUID uuid) {
-	if (isPlayerMentionDisabled(uuid)) {
-		Player player = Bukkit.getPlayer(uuid);
-		if (player != null)
-			player.sendMessage(Component.text(
-				"Vous avez déjà désactivé les mentions. (Les mentions de modérateurs ne sont pas désactivables)")
-				.color(NamedTextColor.RED));
-		return false;
-	}
-	String sql = "INSERT OR IGNORE INTO benjchatmentioner_off(uuid) VALUES(?)";
+		String sql = "INSERT OR IGNORE INTO benjchatmentioner_off(uuid) VALUES(?)";
 
-	try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-		pstmt.setString(1, uuid.toString());
-		pstmt.executeUpdate();
-		System.out.println("Mentions disabled for player: " + uuid);
-		return true;
-	} catch (SQLException e) {
-		System.out.println("Error disabling mentions for player: " + e.getMessage());
-		return false;
-	}
+		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+			pstmt.setString(1, uuid.toString());
+			pstmt.executeUpdate();// Replace with actual player name retrieval if needed
+			logger.info("Mentions disabled for player: " + Bukkit.getOfflinePlayer(uuid).getName());
+			return true;
+		} catch (SQLException e) {
+			logger.severe("Error disabling mentions for player: " + Bukkit.getOfflinePlayer(uuid).getName() + " : " + e.getMessage());
+			return false;
+		}
 }
 
 	public boolean enableMentionsForPlayer(UUID uuid) {
-	if (isPlayerMentionDisabled(uuid)) {
 		String sql = "DELETE FROM benjchatmentioner_off WHERE uuid = ?";
 
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setString(1, uuid.toString());
 			pstmt.executeUpdate();
-			System.out.println("Mentions enabled for player: " + uuid);
+			logger.info("Mentions enabled for player: " + Bukkit.getOfflinePlayer(uuid).getName());
 			return true;
 		} catch (SQLException e) {
-			System.out.println("Error enabling mentions for player: " + e.getMessage());
+			logger.severe("Error enabling mentions for player: " + Bukkit.getOfflinePlayer(uuid).getName() + " : " + e.getMessage());
 			return false;
 		}
-	} else {
-		Player player = Bukkit.getPlayer(uuid);
-		if (player != null)
-			player.sendMessage(Component.text("Les mentions sont déjà activées.").color(NamedTextColor.RED));
-		return false;
 	}
-}
+
 }
